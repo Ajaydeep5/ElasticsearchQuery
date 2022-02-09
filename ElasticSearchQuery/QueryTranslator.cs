@@ -6,28 +6,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("ElasticSearchQuery.Tests")]
 namespace ElasticsearchQuery
 {
     internal class QueryTranslator : ExpressionVisitor
     {
         SearchRequest _searchRequest;
         QueryContainer queryContainer;
-        string field = string.Empty;
+        internal string field { get; private set; } = string.Empty;
         List<GroupBy> fieldsGroupBy = new List<GroupBy>();
         List<Aggregation> aggregations = new List<Aggregation>();
         List<OrderBy> fieldsOrderBy = new List<OrderBy>();
         private bool returnNumberOfRows = false;
         string operacao = string.Empty;
-        ExpressionType binaryExpType;
-        object value = null;
+        internal ExpressionType binaryExpType { get; set; }
+        //internal object value { get; private set; } = null;
+        private object value = null;
         private bool AndCondition = true;
         Type elementType;
         bool denyCondition = false;
         bool isNestedCondition = false;
 
+        internal object Value => value;
+        internal SearchRequest SearchRequest => _searchRequest;
 
-        private AggregationBase _aggregationBase;
+    private AggregationBase _aggregationBase;
 
         public AggregationBase AggregationBase
         {
@@ -811,10 +816,7 @@ namespace ElasticsearchQuery
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 if (displayName != null)
-                {
                     field = displayName;
-         
-                }
                 else
                     field = m.Member.Name.ToCamelCase();
             }
